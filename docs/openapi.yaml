@@ -1,0 +1,256 @@
+openapi: 3.1.0
+info:
+  title: RESQ-LINK API
+  version: 0.1.0
+  description: MVP API for Tuguegarao City Command Center
+servers:
+  - url: https://api.example.com
+    description: Production
+  - url: http://localhost:8000
+    description: Local Dev
+security:
+  - sanctumBearer: []
+components:
+  securitySchemes:
+    sanctumBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: Token
+  schemas:
+    User:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        email: { type: string, format: email }
+        roles:
+          type: array
+          items: { type: string, enum: [Admin, Dispatcher, Responder] }
+    Responder:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        phone: { type: string }
+        status: { type: string, enum: [available, busy, offline] }
+        lastLocation: { $ref: '#/components/schemas/Location' }
+    Incident:
+      type: object
+      properties:
+        id: { type: integer }
+        category: { type: string, enum: [medical, fire, police] }
+        status: { type: string, enum: [new, en_route, on_scene, resolved] }
+        description: { type: string }
+        latitude: { type: number, format: float }
+        longitude: { type: number, format: float }
+        priority: { type: integer }
+        reporter_name: { type: string }
+        reporter_phone: { type: string }
+        created_at: { type: string, format: date-time }
+    StatusUpdate:
+      type: object
+      properties:
+        status: { type: string, enum: [en_route, on_scene, resolved] }
+        note: { type: string }
+    Assignment:
+      type: object
+      properties:
+        id: { type: integer }
+        incident_id: { type: integer }
+        responder_id: { type: integer }
+        status: { type: string, enum: [assigned, acknowledged, completed] }
+    Location:
+      type: object
+      properties:
+        latitude: { type: number }
+        longitude: { type: number }
+        accuracy: { type: number }
+        recorded_at: { type: string, format: date-time }
+paths:
+  /auth/login:
+    post:
+      summary: Login and get token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: { type: string }
+                password: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token: { type: string }
+  /auth/me:
+    get:
+      summary: Get current user
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/User' } } } }
+  /incidents:
+    get:
+      summary: List incidents
+      parameters:
+        - in: query
+          name: status
+          schema: { type: string }
+        - in: query
+          name: category
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Incident' }
+    post:
+      summary: Create incident
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [category, description, latitude, longitude]
+              properties:
+                category: { type: string, enum: [medical, fire, police] }
+                description: { type: string }
+                latitude: { type: number }
+                longitude: { type: number }
+                reporter_name: { type: string }
+                reporter_phone: { type: string }
+      responses:
+        '201': { description: Created }
+  /incidents/{id}:
+    get:
+      summary: Get incident
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Incident' } } } }
+    patch:
+      summary: Update incident
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                category: { type: string }
+                status: { type: string }
+                description: { type: string }
+      responses:
+        '200': { description: Updated }
+  /incidents/{id}/assign:
+    post:
+      summary: Assign nearest responder
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                responder_id: { type: integer, description: Optional explicit responder }
+      responses:
+        '201': { description: Assignment created }
+  /assignments/{id}/ack:
+    post:
+      summary: Responder acknowledges assignment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+  /incidents/{id}/status:
+    post:
+      summary: Post status update
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/StatusUpdate' }
+      responses:
+        '201': { description: Logged }
+  /responders/me/location:
+    post:
+      summary: Update responder location
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Location' }
+      responses:
+        '201': { description: Stored }
+  /webhooks/sms:
+    post:
+      summary: SMS webhook (stub, idempotent)
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '202': { description: Accepted }
+  /webhooks/voice:
+    post:
+      summary: Voice webhook (stub, idempotent)
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '202': { description: Accepted }
+  /reports/summary:
+    get:
+      summary: Basic metrics
+      parameters:
+        - in: query
+          name: from
+          schema: { type: string, format: date-time }
+        - in: query
+          name: to
+          schema: { type: string, format: date-time }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_incidents: { type: integer }
+                  by_type:
+                    type: object
+                    additionalProperties: { type: integer }
+                  avg_response_minutes: { type: number }
