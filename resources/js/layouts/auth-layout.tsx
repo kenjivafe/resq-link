@@ -1,4 +1,5 @@
 import * as React from 'react';
+import AppLogo from '@/components/app-logo';
 
 export default function AuthLayout({
     children,
@@ -13,6 +14,9 @@ export default function AuthLayout({
     return (
         <div className="min-h-screen bg-gray-100 dark:bg-neutral-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8" {...props}>
             <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
+                <div className="flex justify-center">
+                    <AppLogo />
+                </div>
                 {title ? (
                     <h2 className="mt-6 text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">{title}</h2>
                 ) : null}
