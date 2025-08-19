@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\IncidentController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -13,9 +14,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 
     // Dispatcher console: Incidents list
-    Route::get('console/incidents', function () {
-        return Inertia::render('incidents/index');
-    })->name('incidents.index');
+    Route::get('console/incidents', [IncidentController::class, 'index'])->name('incidents.index');
+
+    // Create incident form
+    Route::get('console/incidents/create', function () {
+        return Inertia::render('incidents/create');
+    })->name('incidents.create');
+
+    // Store new incident
+    Route::post('console/incidents', [IncidentController::class, 'store'])->name('incidents.store');
 
     // Incident detail
     Route::get('console/incidents/{id}', function (string $id) {
