@@ -3,6 +3,7 @@ import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import LocationMap from '@/components/location-map';
 
 // NOTE: This is an MVP form that mirrors the current Google Form fields.
 // Backend: expect to create a controller to store these fields. For now we post to route('incidents.store').
@@ -14,8 +15,9 @@ export default function IncidentCreate() {
     priority: 3,
     description: '',
     occurred_at: '',
-    latitude: '',
-    longitude: '',
+    // Default to Tuguegarao coordinates (17.6138° N, 121.7270° E)
+    latitude: 17.6138,
+    longitude: 121.7270,
 
     // Caller info
     caller_name: '',
@@ -95,20 +97,43 @@ export default function IncidentCreate() {
                 <Input id="priority" type="number" min={1} max={5} value={data.priority} onChange={(e) => setData('priority', Number(e.target.value))} />
                 {errors.priority && <p className="text-sm text-red-600">{errors.priority}</p>}
               </div>
-              <div className="md:col-span-2 grid gap-2">
-                <Label htmlFor="description">Description</Label>
-                <textarea id="description" className="border rounded px-3 py-2 min-h-[80px] bg-white dark:bg-neutral-900" value={data.description} onChange={(e) => setData('description', e.target.value)} />
-                {errors.description && <p className="text-sm text-red-600">{errors.description}</p>}
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="occurred_at">Occurred At</Label>
-                <Input id="occurred_at" type="datetime-local" value={data.occurred_at} onChange={(e) => setData('occurred_at', e.target.value)} />
-              </div>
-              <div className="grid gap-2">
-                <Label>Location</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  <Input placeholder="Latitude" value={data.latitude} onChange={(e) => setData('latitude', e.target.value)} />
-                  <Input placeholder="Longitude" value={data.longitude} onChange={(e) => setData('longitude', e.target.value)} />
+              <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="description">Description</Label>
+                    <textarea 
+                      id="description" 
+                      className="border rounded px-3 py-2 h-[calc(100%-2.5rem)] min-h-[200px] bg-white dark:bg-neutral-900 w-full" 
+                      value={data.description} 
+                      onChange={(e) => setData('description', e.target.value)} 
+                    />
+                    {errors.description && <p className="text-sm text-red-600">{errors.description}</p>}
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="occurred_at">Occurred At</Label>
+                    <Input 
+                      id="occurred_at" 
+                      type="datetime-local" 
+                      value={data.occurred_at} 
+                      onChange={(e) => setData('occurred_at', e.target.value)} 
+                    />
+                  </div>
+                </div>
+                <div className="grid gap-2">
+                  <Label>Location (click on the map to set)</Label>
+                  <div className="h-[calc(200px+1rem+2.5rem+2px)] rounded-md overflow-hidden border">
+                    <LocationMap 
+                      onLocationSelect={(lat: number, lng: number) => {
+                        setData('latitude', lat);
+                        setData('longitude', lng);
+                      }}
+                      initialPosition={[data.latitude, data.longitude]}
+                      className="h-full"
+                    />
+                  </div>
+                  <div className="text-sm text-neutral-500">
+                    <span>Selected location: {data.latitude.toFixed(6)}, {data.longitude.toFixed(6)}</span>
+                  </div>
                 </div>
               </div>
             </div>
