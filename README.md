@@ -1,4 +1,6 @@
-# ResQ Link Monorepo
+# RESQ-Link
+
+![resq-link](https://github.com/user-attachments/assets/c84f2363-276b-4d14-abcf-548cac332b26)
 
 ResQ Link is a Turborepo-managed monorepo delivering the Incident Response Coordination
 feature set across API, web dispatcher console, and mobile applications.
