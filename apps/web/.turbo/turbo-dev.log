@@ -1,0 +1,15 @@
+
+> @resq-link/web@0.1.0 dev D:\Codes\resq-link-monorepo\resq-link\apps\web
+> next dev
+
+   ▲ Next.js 16.0.0 (Turbopack)
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.100.209:3000
+   - Environments: .env
+
+ ✓ Starting...
+ ✓ Ready in 1212ms
+ GET /incidents 200 in 3.0s (compile: 2.8s, render: 195ms)
+ GET /incidents 200 in 75ms (compile: 10ms, render: 65ms)
+ ✓ Compiled in 845ms
+ GET /incidents 200 in 147ms (compile: 113ms, render: 34ms)
