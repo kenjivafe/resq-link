@@ -1,0 +1,36 @@
+
+> @resq-link/mobile@0.1.0 test D:\Codes\RESQ-LINK\apps\mobile
+> jest
+
+● Validation Warning:
+
+  Unknown option "watchPlugins" with value ["D:\\Codes\\RESQ-LINK\\node_modules\\.pnpm\\jest-watch-typeahead@2.2.1_jest@29.7.0_@types+node@20.19.23_ts-node@10.9.2_@types+node@20.19.23_typescript@5.9.3__\\node_modules\\jest-watch-typeahead\\build\\file_name_plugin\\plugin.js", "D:\\Codes\\RESQ-LINK\\node_modules\\.pnpm\\jest-watch-typeahead@2.2.1_jest@29.7.0_@types+node@20.19.23_ts-node@10.9.2_@types+node@20.19.23_typescript@5.9.3__\\node_modules\\jest-watch-typeahead\\build\\test_name_plugin\\plugin.js"] was found.
+  This is probably a typing mistake. Fixing it will remove this message.
+
+  Configuration Documentation:
+  https://jestjs.io/docs/configuration
+
+● Validation Warning:
+
+  Unknown option "watchPlugins" with value ["D:\\Codes\\RESQ-LINK\\node_modules\\.pnpm\\jest-watch-typeahead@2.2.1_jest@29.7.0_@types+node@20.19.23_ts-node@10.9.2_@types+node@20.19.23_typescript@5.9.3__\\node_modules\\jest-watch-typeahead\\build\\file_name_plugin\\plugin.js", "D:\\Codes\\RESQ-LINK\\node_modules\\.pnpm\\jest-watch-typeahead@2.2.1_jest@29.7.0_@types+node@20.19.23_ts-node@10.9.2_@types+node@20.19.23_typescript@5.9.3__\\node_modules\\jest-watch-typeahead\\build\\test_name_plugin\\plugin.js"] was found.
+  This is probably a typing mistake. Fixing it will remove this message.
+
+  Configuration Documentation:
+  https://jestjs.io/docs/configuration
+
+● Validation Warning:
+
+  Unknown option "watchPlugins" with value ["D:\\Codes\\RESQ-LINK\\node_modules\\.pnpm\\jest-watch-typeahead@2.2.1_jest@29.7.0_@types+node@20.19.23_ts-node@10.9.2_@types+node@20.19.23_typescript@5.9.3__\\node_modules\\jest-watch-typeahead\\build\\file_name_plugin\\plugin.js", "D:\\Codes\\RESQ-LINK\\node_modules\\.pnpm\\jest-watch-typeahead@2.2.1_jest@29.7.0_@types+node@20.19.23_ts-node@10.9.2_@types+node@20.19.23_typescript@5.9.3__\\node_modules\\jest-watch-typeahead\\build\\test_name_plugin\\plugin.js"] was found.
+  This is probably a typing mistake. Fixing it will remove this message.
+
+  Configuration Documentation:
+  https://jestjs.io/docs/configuration
+
+PASS iOS app/__tests__/ReportIncident.test.tsx (5.221 s)
+PASS Android app/__tests__/ReportIncident.test.tsx (5.296 s)
+
+Test Suites: 2 passed, 2 total
+Tests:       2 passed, 2 total
+Snapshots:   0 total
+Time:        6.517 s, estimated 10 s
+Ran all test suites in 2 projects.

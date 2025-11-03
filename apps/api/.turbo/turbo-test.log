@@ -1,0 +1,14 @@
+
+> @resq-link/api@0.1.0 test D:\Codes\RESQ-LINK\apps\api
+> cross-env NODE_ENV=test jest --config jest.config.ts
+
+PASS test/public-incidents.spec.ts (5.41 s)
+  Public Incidents API (integration)
+    √ creates an incident, emits broadcast, and surfaces in list (376 ms)
+    √ rejects invalid submissions (10 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       2 passed, 2 total
+Snapshots:   0 total
+Time:        5.631 s
+Ran all test suites.

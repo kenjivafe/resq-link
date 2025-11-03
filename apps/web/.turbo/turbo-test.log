@@ -1,0 +1,10 @@
+
+> @resq-link/web@0.1.0 test D:\Codes\RESQ-LINK\apps\web
+> playwright test
+
+
+Running 1 test using 1 worker
+
+  ✓  1 [chromium] › tests\incident-live.spec.ts:14:7 › T020 - Live incident dashboard › shows newly submitted incidents in the feed (1.6s)
+
+  1 passed (4.5s)

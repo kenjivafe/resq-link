@@ -1,0 +1,112 @@
+openapi: 3.1.0
+info:
+  title: Upload Service API
+  version: 0.1.0
+  description: Endpoints for requesting and completing media uploads.
+servers:
+  - url: https://api.resqlink.local
+paths:
+  /api/uploads:
+    post:
+      summary: Request signed upload URL
+      operationId: requestUploadUrl
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadRequest'
+      responses:
+        '200':
+          description: Signed upload URL generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadResponse'
+  /api/uploads/complete:
+    post:
+      summary: Confirm upload completion
+      operationId: confirmUpload
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadCompleteRequest'
+      responses:
+        '200':
+          description: Upload metadata recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IncidentMediaItem'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    UploadRequest:
+      type: object
+      required: [incidentId, contentType]
+      properties:
+        incidentId:
+          type: string
+          format: uuid
+        contentType:
+          type: string
+          enum: [image/jpeg, image/png, video/mp4]
+        fileSizeBytes:
+          type: integer
+          minimum: 1
+        filename:
+          type: string
+    UploadResponse:
+      type: object
+      properties:
+        uploadUrl:
+          type: string
+          format: uri
+        mediaId:
+          type: string
+          format: uuid
+        expiresAt:
+          type: string
+          format: date-time
+    UploadCompleteRequest:
+      type: object
+      required: [mediaId]
+      properties:
+        mediaId:
+          type: string
+          format: uuid
+        storageUrl:
+          type: string
+          format: uri
+        checksum:
+          type: string
+        sizeBytes:
+          type: integer
+    IncidentMediaItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        incidentId:
+          type: string
+          format: uuid
+        url:
+          type: string
+          format: uri
+        type:
+          type: string
+          enum: [image, video]
+        status:
+          type: string
+          enum: [pending_scan, approved, rejected]

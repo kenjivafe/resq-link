@@ -1,0 +1,313 @@
+openapi: 3.1.0
+info:
+  title: Incident Service API
+  version: 0.1.0
+  description: REST endpoints for creating, viewing, and updating incidents in ResQ Link.
+servers:
+  - url: https://api.resqlink.local
+paths:
+  /public/incidents:
+    post:
+      summary: Submit anonymous incident
+      description: Allows unauthenticated citizens to report an incident.
+      operationId: createPublicIncident
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublicIncidentCreateRequest'
+      responses:
+        '201':
+          description: Incident created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IncidentResponse'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateLimitError'
+  /api/incidents:
+    post:
+      summary: Submit authenticated incident
+      operationId: createAuthenticatedIncident
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthenticatedIncidentCreateRequest'
+      responses:
+        '201':
+          description: Incident created and linked to the authenticated user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IncidentResponse'
+    get:
+      summary: List incidents
+      operationId: listIncidents
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/StatusFilter'
+        - $ref: '#/components/parameters/BboxFilter'
+        - $ref: '#/components/parameters/SinceFilter'
+      responses:
+        '200':
+          description: Matching incidents
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  incidents:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/IncidentSummary'
+  /api/incidents/{incidentId}:
+    get:
+      summary: Get incident detail
+      operationId: getIncident
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IncidentId'
+      responses:
+        '200':
+          description: Incident detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IncidentResponse'
+    put:
+      summary: Update incident fields (owner/admin)
+      operationId: updateIncident
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IncidentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IncidentUpdateRequest'
+      responses:
+        '200':
+          description: Incident updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IncidentResponse'
+  /api/incidents/{incidentId}/status:
+    patch:
+      summary: Update incident status
+      operationId: patchIncidentStatus
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IncidentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IncidentStatusUpdateRequest'
+      responses:
+        '200':
+          description: Incident status updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IncidentResponse'
+        '403':
+          description: Caller not authorized for requested transition
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    IncidentId:
+      name: incidentId
+      in: path
+      required: true
+      description: Incident identifier (UUID)
+      schema:
+        type: string
+        format: uuid
+    StatusFilter:
+      name: status
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/IncidentStatus'
+    BboxFilter:
+      name: bbox
+      in: query
+      required: false
+      description: Bounding box query in minLon,minLat,maxLon,maxLat order
+      schema:
+        type: string
+    SinceFilter:
+      name: since
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date-time
+  schemas:
+    IncidentStatus:
+      type: string
+      enum: [pending, assigned, responding, resolved, escalated]
+    IncidentSeverity:
+      type: string
+      enum: [low, medium, high, critical]
+    PublicIncidentCreateRequest:
+      type: object
+      required: [type]
+      properties:
+        type:
+          type: string
+        description:
+          type: string
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        photoUrls:
+          type: array
+          items:
+            type: string
+            format: uri
+        contact:
+          type: object
+          properties:
+            name:
+              type: string
+            phone:
+              type: string
+            email:
+              type: string
+              format: email
+        deviceFingerprint:
+          type: string
+    AuthenticatedIncidentCreateRequest:
+      allOf:
+        - $ref: '#/components/schemas/PublicIncidentCreateRequest'
+        - type: object
+          properties:
+            visibility:
+              type: string
+              enum: [private, shared]
+    IncidentUpdateRequest:
+      type: object
+      properties:
+        description:
+          type: string
+        severity:
+          $ref: '#/components/schemas/IncidentSeverity'
+        attachments:
+          type: array
+          items:
+            type: string
+            format: uri
+    IncidentStatusUpdateRequest:
+      type: object
+      required: [status]
+      properties:
+        status:
+          $ref: '#/components/schemas/IncidentStatus'
+        rationale:
+          type: string
+        escalateReason:
+          type: string
+    IncidentSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+        status:
+          $ref: '#/components/schemas/IncidentStatus'
+        severity:
+          $ref: '#/components/schemas/IncidentSeverity'
+        reportedAt:
+          type: string
+          format: date-time
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+    IncidentResponse:
+      allOf:
+        - $ref: '#/components/schemas/IncidentSummary'
+        - type: object
+          properties:
+            description:
+              type: string
+            reporterId:
+              type: string
+              format: uuid
+            deviceFingerprint:
+              type: string
+            media:
+              type: array
+              items:
+                $ref: '#/components/schemas/IncidentMediaItem'
+            auditTrail:
+              type: array
+              items:
+                $ref: '#/components/schemas/AuditEvent'
+    IncidentMediaItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        url:
+          type: string
+          format: uri
+        type:
+          type: string
+          enum: [image, video]
+        status:
+          type: string
+          enum: [pending_scan, approved, rejected]
+    AuditEvent:
+      type: object
+      properties:
+        actorId:
+          type: string
+          format: uuid
+        action:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        details:
+          type: object
+          additionalProperties: true
+    RateLimitError:
+      type: object
+      properties:
+        code:
+          type: string
+          example: RATE_LIMITED
+        message:
+          type: string
+        retryAfterSeconds:
+          type: integer

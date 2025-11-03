@@ -1,0 +1,29 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-native",
+    "allowJs": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./app/*"],
+      "@/testing-library/react-native": ["./testing/testing-library/react-native"]
+    },
+    "types": [
+      "node",
+      "react",
+      "react-native",
+      "jest"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "index.js",
+    "babel.config.js",
+    "jest.config.js"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

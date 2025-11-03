@@ -1,0 +1,4 @@
+
+> @resq-link/api@0.1.0 lint D:\Codes\RESQ-LINK\apps\api
+> eslint --config ../../eslint.config.mjs --no-error-on-unmatched-pattern "src/**/*.{ts,tsx}" "test/**/*.ts"
+

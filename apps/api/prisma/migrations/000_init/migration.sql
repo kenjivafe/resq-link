@@ -1,0 +1,2 @@
+-- Baseline migration generated during initial scaffold.
+-- Tables will be introduced in subsequent user story phases.

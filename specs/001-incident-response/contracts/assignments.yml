@@ -1,0 +1,137 @@
+openapi: 3.1.0
+info:
+  title: Assignment Service API
+  version: 0.1.0
+  description: Endpoints for dispatcher assignment workflows in ResQ Link.
+servers:
+  - url: https://api.resqlink.local
+paths:
+  /api/incidents/{incidentId}/assign:
+    post:
+      summary: Create responder assignment
+      operationId: createAssignment
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IncidentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignmentCreateRequest'
+      responses:
+        '201':
+          description: Assignment created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignmentResponse'
+  /api/assignments/{assignmentId}:
+    get:
+      summary: Retrieve assignment detail
+      operationId: getAssignment
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AssignmentId'
+      responses:
+        '200':
+          description: Assignment detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignmentResponse'
+    patch:
+      summary: Update assignment state
+      operationId: patchAssignment
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AssignmentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignmentUpdateRequest'
+      responses:
+        '200':
+          description: Assignment updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignmentResponse'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    IncidentId:
+      name: incidentId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    AssignmentId:
+      name: assignmentId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  schemas:
+    AssignmentCreateRequest:
+      type: object
+      required: [responderId]
+      properties:
+        responderId:
+          type: string
+          format: uuid
+        message:
+          type: string
+        priority:
+          type: string
+          enum: [normal, urgent]
+    AssignmentUpdateRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [pending, acknowledged, declined, completed]
+        acknowledgedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+    AssignmentResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        incidentId:
+          type: string
+          format: uuid
+        responderId:
+          type: string
+          format: uuid
+        assignedBy:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [pending, acknowledged, declined, completed]
+        assignedAt:
+          type: string
+          format: date-time
+        acknowledgedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time

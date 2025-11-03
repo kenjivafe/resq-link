@@ -1,0 +1,116 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum IncidentStatus {
+  pending
+  assigned
+  responding
+  resolved
+  escalated
+}
+
+enum IncidentSeverity {
+  low
+  medium
+  high
+  critical
+}
+
+enum NotificationChannel {
+  push
+  sms
+}
+
+enum NotificationStatus {
+  pending
+  delivered
+  failed
+  retried
+}
+
+enum AssignmentPriority {
+  normal
+  urgent
+}
+
+enum AssignmentStatus {
+  pending
+  acknowledged
+  declined
+  completed
+}
+
+model Incident {
+  id                String            @id @default(uuid()) @db.Uuid
+  type              String
+  description       String?
+  latitude          Decimal?         @db.Decimal(9, 6)
+  longitude         Decimal?         @db.Decimal(9, 6)
+  address           String?
+  status            IncidentStatus   @default(pending)
+  severity          IncidentSeverity @default(medium)
+  reporterId        String?
+  deviceFingerprint String?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  assignments   Assignment[]
+  notifications NotificationLog[]
+
+  @@index([status, updatedAt])
+  @@index([latitude, longitude])
+}
+
+model RateLimitRecord {
+  id                String   @id @default(uuid()) @db.Uuid
+  deviceFingerprint String?  @unique
+  ipHash            String
+  windowStart       DateTime
+  requestCount      Int
+  captchaRequired   Boolean  @default(false)
+  lastAttemptAt     DateTime
+
+  @@index([ipHash])
+}
+
+model Assignment {
+  id          String    @id @default(uuid()) @db.Uuid
+  incidentId  String    @db.Uuid
+  responderId String    @db.Uuid
+  assignedBy  String?   @db.Uuid
+  assignedAt  DateTime  @default(now())
+  acceptedAt  DateTime?
+  completedAt DateTime?
+  message     String?
+  priority    AssignmentPriority @default(normal)
+  status      AssignmentStatus   @default(pending)
+
+  incident Incident @relation(fields: [incidentId], references: [id])
+
+  @@index([incidentId])
+  @@index([responderId])
+}
+
+model NotificationLog {
+  id           String              @id @default(uuid()) @db.Uuid
+  userId       String              @db.Uuid
+  incidentId   String?             @db.Uuid
+  channel      NotificationChannel
+  payload      Json
+  status       NotificationStatus
+  errorMessage String?
+  sentAt       DateTime            @default(now())
+
+  incident Incident? @relation(fields: [incidentId], references: [id])
+
+  @@index([userId])
+  @@index([incidentId])
+  @@index([status, sentAt])
+}

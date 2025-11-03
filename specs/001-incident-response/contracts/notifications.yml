@@ -1,0 +1,111 @@
+openapi: 3.1.0
+info:
+  title: Notification Service API
+  version: 0.1.0
+  description: Endpoints for managing push notifications and delivery logs in ResQ Link.
+servers:
+  - url: https://api.resqlink.local
+paths:
+  /api/notifications/test:
+    post:
+      summary: Send test notification to device
+      operationId: sendTestNotification
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TestNotificationRequest'
+      responses:
+        '202':
+          description: Notification queued for delivery
+  /api/notifications/logs:
+    get:
+      summary: List notification delivery attempts
+      operationId: listNotificationLogs
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UserIdFilter'
+        - $ref: '#/components/parameters/IncidentIdFilter'
+        - $ref: '#/components/parameters/SinceFilter'
+      responses:
+        '200':
+          description: Notification logs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  notifications:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/NotificationLogEntry'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    UserIdFilter:
+      name: userId
+      in: query
+      required: false
+      schema:
+        type: string
+        format: uuid
+    IncidentIdFilter:
+      name: incidentId
+      in: query
+      required: false
+      schema:
+        type: string
+        format: uuid
+    SinceFilter:
+      name: since
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date-time
+  schemas:
+    TestNotificationRequest:
+      type: object
+      required: [userId, title, body]
+      properties:
+        userId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        body:
+          type: string
+        data:
+          type: object
+          additionalProperties: true
+    NotificationLogEntry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        incidentId:
+          type: string
+          format: uuid
+        channel:
+          type: string
+          enum: [push, sms]
+        status:
+          type: string
+          enum: [pending, delivered, failed, retried]
+        errorMessage:
+          type: string
+        sentAt:
+          type: string
+          format: date-time
