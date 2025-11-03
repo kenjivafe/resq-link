@@ -46,10 +46,10 @@ description: "Task list for Incident Response Coordination feature"
 
 - [x] T022 [US2] Extend Prisma schema with `Assignment` and `NotificationLog` models in `apps/api/prisma/schema.prisma`
 - [x] T023 [US2] Implement authenticated incident list with filters in `apps/api/src/modules/incidents/incidents.controller.ts` and service
-- [ ] T024 [US2] Build dispatcher filter UI and incident detail panel in `apps/web/app/incidents/(dashboard)/page.tsx`
+- [x] T024 [US2] Build dispatcher filter UI and incident detail panel in `apps/web/app/incidents/page.tsx`
 - [x] T025 [US2] Implement responder assignment endpoint in `apps/api/src/modules/assignments/assignments.controller.ts` and service layer
 - [x] T026 [US2] Trigger push notifications and log deliveries in `apps/api/src/modules/notifications/notifications.service.ts`
-- [ ] T027 [US2] Add assignment management UI for dispatchers in `apps/web/app/incidents/[id]/assign.tsx`
+- [x] T027 [US2] Assignment management UI for dispatchers in `apps/web/app/incidents/page.tsx`
 - [ ] T028 [P] [US2] Add contract tests covering assignment flow in `apps/api/test/assignments.spec.ts`
 - [ ] T029 [P] [US2] Add Playwright scenario for dispatcher assignment workflow in `apps/web/tests/assignment-flow.spec.ts`
 
