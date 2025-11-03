@@ -33,22 +33,22 @@ description: "Task list for Incident Response Coordination feature"
 ## Phase 3: User Story 1 - Rapid Public Incident Submission (Priority: P1)
 
 - [x] T013 [US1] Add `Incident` and `RateLimitRecord` models plus migrations in `apps/api/prisma/schema.prisma`
-- [ ] T014 [US1] Implement public incident POST endpoint in `apps/api/src/modules/incidents/public/public-incidents.controller.ts` and service logic
-- [ ] T015 [US1] Integrate per-device/IP rate limiting guard in `apps/api/src/common/guards/public-rate-limit.guard.ts` backed by Redis
-- [ ] T016 [US1] Publish `incident.created` WebSocket events from `apps/api/src/websockets/incident.gateway.ts`
-- [ ] T017 [US1] Build live incident list and real-time hook in `apps/web/app/incidents/page.tsx` consuming WebSocket feed
-- [ ] T018 [US1] Create anonymous reporting flow with location, media capture, and submission in `apps/mobile/app/report.tsx`
-- [ ] T019 [P] [US1] Add integration tests for public submissions and event emission in `apps/api/test/public-incidents.spec.ts`
-- [ ] T020 [P] [US1] Add Playwright scenario verifying dashboard updates in `apps/web/tests/incident-live.spec.ts`
-- [ ] T021 [P] [US1] Add Expo E2E test covering anonymous report flow in `apps/mobile/tests/report-flow.e2e.ts`
+- [x] T014 [US1] Implement public incident POST endpoint in `apps/api/src/modules/incidents/public/public-incidents.controller.ts` and service logic
+- [x] T015 [US1] Integrate per-device/IP rate limiting guard in `apps/api/src/common/guards/public-rate-limit.guard.ts` backed by Redis
+- [x] T016 [US1] Publish `incident.created` WebSocket events from `apps/api/src/websockets/incident.gateway.ts`
+- [x] T017 [US1] Build live incident list and real-time hook in `apps/web/app/incidents/page.tsx` consuming WebSocket feed
+- [x] T018 [US1] Create anonymous reporting flow with location, media capture, and submission in `apps/mobile/app/report.tsx`
+- [x] T019 [P] [US1] Add integration tests for public submissions and event emission in `apps/api/test/public-incidents.spec.ts`
+- [x] T020 [P] [US1] Add Playwright scenario verifying dashboard updates in `apps/web/tests/incident-live.spec.ts`
+- [x] T021 [P] [US1] Add Expo E2E test covering anonymous report flow in `apps/mobile/tests/report-flow.e2e.ts`
 
 ## Phase 4: User Story 2 - Dispatcher Triage & Assignment (Priority: P2)
 
-- [ ] T022 [US2] Extend Prisma schema with `Assignment` and `NotificationLog` models in `apps/api/prisma/schema.prisma`
-- [ ] T023 [US2] Implement authenticated incident list with filters in `apps/api/src/modules/incidents/incidents.controller.ts` and service
+- [x] T022 [US2] Extend Prisma schema with `Assignment` and `NotificationLog` models in `apps/api/prisma/schema.prisma`
+- [x] T023 [US2] Implement authenticated incident list with filters in `apps/api/src/modules/incidents/incidents.controller.ts` and service
 - [ ] T024 [US2] Build dispatcher filter UI and incident detail panel in `apps/web/app/incidents/(dashboard)/page.tsx`
-- [ ] T025 [US2] Implement responder assignment endpoint in `apps/api/src/modules/assignments/assignments.controller.ts` and service layer
-- [ ] T026 [US2] Trigger push notifications and log deliveries in `apps/api/src/modules/notifications/notifications.service.ts`
+- [x] T025 [US2] Implement responder assignment endpoint in `apps/api/src/modules/assignments/assignments.controller.ts` and service layer
+- [x] T026 [US2] Trigger push notifications and log deliveries in `apps/api/src/modules/notifications/notifications.service.ts`
 - [ ] T027 [US2] Add assignment management UI for dispatchers in `apps/web/app/incidents/[id]/assign.tsx`
 - [ ] T028 [P] [US2] Add contract tests covering assignment flow in `apps/api/test/assignments.spec.ts`
 - [ ] T029 [P] [US2] Add Playwright scenario for dispatcher assignment workflow in `apps/web/tests/assignment-flow.spec.ts`
