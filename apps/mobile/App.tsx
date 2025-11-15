@@ -1,11 +1,11 @@
-import 'react-native-get-random-values';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { StatusBar } from 'expo-status-bar';
-import * as ImagePicker from 'expo-image-picker';
-import { useEffect, useMemo, useState } from 'react';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import "react-native-get-random-values";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { StatusBar } from "expo-status-bar";
+import * as ImagePicker from "expo-image-picker";
+import { useEffect, useMemo, useState } from "react";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import {
   ActivityIndicator,
   Alert,
@@ -17,27 +17,27 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
-} from 'react-native';
-import { v4 as uuid } from 'uuid';
+  View,
+} from "react-native";
+import { v4 as uuid } from "uuid";
 
 const Stack = createNativeStackNavigator();
 
-type Severity = 'low' | 'medium' | 'high' | 'critical';
+type Severity = "low" | "medium" | "high" | "critical";
 
-type SubmitResult = {
+interface SubmitResult {
   incidentId: string;
   status: string;
   submittedAt: string;
-};
+}
 
-type ReportHeaderProps = {
+interface ReportHeaderProps {
   title: string;
-};
+}
 
 function ReportHeader({ title }: ReportHeaderProps) {
   return (
-    <SafeAreaView edges={['top']} style={styles.headerSafeArea}>
+    <SafeAreaView edges={["top"]} style={styles.headerSafeArea}>
       <View style={styles.headerContainer}>
         <Text style={styles.headerTitle}>{title}</Text>
       </View>
@@ -47,17 +47,41 @@ function ReportHeader({ title }: ReportHeaderProps) {
 
 type SelectedAsset = ImagePicker.ImagePickerAsset & { base64?: string };
 
-const severityOptions: Severity[] = ['low', 'medium', 'high', 'critical'];
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://localhost:4000';
+const severityOptions: Severity[] = ["low", "medium", "high", "critical"];
+
+const resolveApiBaseUrl = (): string | undefined => {
+  if (typeof process === "undefined") {
+    return undefined;
+  }
+
+  const rawValue: unknown = process.env?.EXPO_PUBLIC_API_BASE_URL;
+  return typeof rawValue === "string" && rawValue.length > 0
+    ? rawValue
+    : undefined;
+};
+
+const API_BASE_URL = resolveApiBaseUrl() ?? "http://localhost:4000";
+const PRIMARY_COLOR = "#b4ce93";
+const COLORS = {
+  background: "#f9fafb",
+  surface: "#ffffff",
+  textPrimary: "#1f2937",
+  textSecondary: "#4b5563",
+  muted: "#6b7280",
+  border: "#e5e7eb",
+  danger: "#b91c1c",
+  successSurface: "#ecfdf3",
+  successText: "#14532d",
+};
 
 function ReportIncidentScreen() {
   const [fingerprint, setFingerprint] = useState<string | null>(null);
-  const [type, setType] = useState('');
-  const [description, setDescription] = useState('');
-  const [address, setAddress] = useState('');
-  const [latitude, setLatitude] = useState('');
-  const [longitude, setLongitude] = useState('');
-  const [severity, setSeverity] = useState<Severity>('medium');
+  const [type, setType] = useState("");
+  const [description, setDescription] = useState("");
+  const [address, setAddress] = useState("");
+  const [latitude, setLatitude] = useState("");
+  const [longitude, setLongitude] = useState("");
+  const [severity, setSeverity] = useState<Severity>("medium");
   const [photo, setPhoto] = useState<SelectedAsset | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -66,20 +90,20 @@ function ReportIncidentScreen() {
   useEffect(() => {
     const ensureFingerprint = async () => {
       try {
-        const existing = await AsyncStorage.getItem('deviceFingerprint');
+        const existing = await AsyncStorage.getItem("deviceFingerprint");
         if (existing) {
           setFingerprint(existing);
           return;
         }
         const newId = uuid();
-        await AsyncStorage.setItem('deviceFingerprint', newId);
+        await AsyncStorage.setItem("deviceFingerprint", newId);
         setFingerprint(newId);
       } catch (storageError) {
-        console.warn('Unable to access AsyncStorage', storageError);
+        console.warn("Unable to access AsyncStorage", storageError);
       }
     };
 
-    ensureFingerprint();
+    void ensureFingerprint();
   }, []);
 
   const latitudeNumber = useMemo(() => {
@@ -93,28 +117,32 @@ function ReportIncidentScreen() {
   }, [longitude]);
 
   const resetForm = () => {
-    setType('');
-    setDescription('');
-    setAddress('');
-    setLatitude('');
-    setLongitude('');
-    setSeverity('medium');
+    setType("");
+    setDescription("");
+    setAddress("");
+    setLatitude("");
+    setLongitude("");
+    setSeverity("medium");
     setPhoto(null);
   };
 
   const handlePickPhoto = async () => {
     try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== ImagePicker.PermissionStatus.GRANTED) {
-        Alert.alert('Permission needed', 'Please allow photo access to attach media.');
+        Alert.alert(
+          "Permission needed",
+          "Please allow photo access to attach media.",
+        );
         return;
       }
 
       const resultPicker = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'],
+        mediaTypes: ["images"],
         allowsEditing: false,
         quality: 0.7,
-        base64: true
+        base64: true,
       });
 
       if (resultPicker.canceled || !resultPicker.assets.length) {
@@ -124,17 +152,17 @@ function ReportIncidentScreen() {
       const asset = resultPicker.assets[0];
       setPhoto({
         ...asset,
-        base64: asset.base64 ?? undefined
+        base64: asset.base64 ?? undefined,
       });
     } catch (pickerError) {
-      console.error('Image picker error', pickerError);
-      Alert.alert('Unable to select image', 'Please try again later.');
+      console.error("Image picker error", pickerError);
+      Alert.alert("Unable to select image", "Please try again later.");
     }
   };
 
   const submitIncident = async () => {
     if (!type.trim()) {
-      Alert.alert('Missing information', 'Please provide an incident type.');
+      Alert.alert("Missing information", "Please provide an incident type.");
       return;
     }
 
@@ -143,10 +171,10 @@ function ReportIncidentScreen() {
 
     try {
       const response = await fetch(`${API_BASE_URL}/public/incidents`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          ...(fingerprint ? { 'x-device-fingerprint': fingerprint } : {})
+          "Content-Type": "application/json",
+          ...(fingerprint ? { "x-device-fingerprint": fingerprint } : {}),
         },
         body: JSON.stringify({
           type: type.trim(),
@@ -154,17 +182,23 @@ function ReportIncidentScreen() {
           address: address.trim() || undefined,
           severity,
           latitude: latitudeNumber,
-          longitude: longitudeNumber
-        })
+          longitude: longitudeNumber,
+        }),
       });
 
       if (!response.ok) {
         if (response.status === 429) {
-          throw new Error('You are submitting too quickly. Please wait a moment and try again.');
+          throw new Error(
+            "You are submitting too quickly. Please wait a moment and try again.",
+          );
         }
 
-        const payload = (await response.json().catch(() => null)) as { message?: string } | null;
-        throw new Error(payload?.message ?? 'Unable to submit incident. Please try again.');
+        const payload = (await response.json().catch(() => null)) as {
+          message?: string;
+        } | null;
+        throw new Error(
+          payload?.message ?? "Unable to submit incident. Please try again.",
+        );
       }
 
       const data = (await response.json()) as SubmitResult;
@@ -173,12 +207,16 @@ function ReportIncidentScreen() {
 
       if (!fingerprint) {
         const newId = uuid();
-        await AsyncStorage.setItem('deviceFingerprint', newId);
+        await AsyncStorage.setItem("deviceFingerprint", newId);
         setFingerprint(newId);
       }
     } catch (submissionError) {
-      console.error('Incident submission failed', submissionError);
-      setError(submissionError instanceof Error ? submissionError.message : 'Unexpected error occurred.');
+      console.error("Incident submission failed", submissionError);
+      setError(
+        submissionError instanceof Error
+          ? submissionError.message
+          : "Unexpected error occurred.",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -187,13 +225,17 @@ function ReportIncidentScreen() {
   return (
     <KeyboardAvoidingView
       style={styles.flex}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+      >
         <Text style={styles.heading}>Anonymous Incident Report</Text>
         <Text style={styles.subheading}>
-          Provide as much detail as possible. Dispatchers will review your report immediately.
+          Provide as much detail as possible. Dispatchers will review your
+          report immediately.
         </Text>
 
         <View style={styles.section}>
@@ -234,7 +276,11 @@ function ReportIncidentScreen() {
                   onPress={() => setSeverity(option)}
                   style={[styles.pill, isActive && styles.pillActive]}
                 >
-                  <Text style={[styles.pillText, isActive && styles.pillTextActive]}>{option.toUpperCase()}</Text>
+                  <Text
+                    style={[styles.pillText, isActive && styles.pillTextActive]}
+                  >
+                    {option.toUpperCase()}
+                  </Text>
                 </TouchableOpacity>
               );
             })}
@@ -253,7 +299,7 @@ function ReportIncidentScreen() {
           />
         </View>
 
-        <View style={[styles.section, styles.coordinates]}> 
+        <View style={[styles.section, styles.coordinates]}>
           <View style={styles.coordinateField}>
             <Text style={styles.label}>Latitude</Text>
             <TextInput
@@ -280,13 +326,22 @@ function ReportIncidentScreen() {
 
         <View style={styles.section}>
           <Text style={styles.label}>Optional photo</Text>
-          <TouchableOpacity style={styles.photoButton} onPress={handlePickPhoto}>
-            <Text style={styles.photoButtonText}>{photo ? 'Replace photo' : 'Add photo'}</Text>
+          <TouchableOpacity
+            style={styles.photoButton}
+            onPress={() => {
+              void handlePickPhoto();
+            }}
+          >
+            <Text style={styles.photoButtonText}>
+              {photo ? "Replace photo" : "Add photo"}
+            </Text>
           </TouchableOpacity>
           {photo ? (
             <View style={styles.photoPreviewContainer}>
               <Image source={{ uri: photo.uri }} style={styles.photoPreview} />
-              <Text style={styles.photoHint}>Photo attached locally. Upload pipeline coming in a future task.</Text>
+              <Text style={styles.photoHint}>
+                Photo attached locally. Upload pipeline coming in a future task.
+              </Text>
             </View>
           ) : null}
         </View>
@@ -295,7 +350,9 @@ function ReportIncidentScreen() {
         {result ? (
           <View style={styles.successContainer}>
             <Text style={styles.successHeading}>Incident submitted</Text>
-            <Text style={styles.successText}>Reference ID: {result.incidentId}</Text>
+            <Text style={styles.successText}>
+              Reference ID: {result.incidentId}
+            </Text>
             <Text style={styles.successText}>Status: {result.status}</Text>
             <Text style={styles.successText}>
               Submitted at: {new Date(result.submittedAt).toLocaleString()}
@@ -304,11 +361,20 @@ function ReportIncidentScreen() {
         ) : null}
 
         <TouchableOpacity
-          style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]}
-          onPress={submitIncident}
+          style={[
+            styles.submitButton,
+            isSubmitting && styles.submitButtonDisabled,
+          ]}
+          onPress={() => {
+            void submitIncident();
+          }}
           disabled={isSubmitting}
         >
-          {isSubmitting ? <ActivityIndicator color="#0F172A" /> : <Text style={styles.submitButtonText}>Submit report</Text>}
+          {isSubmitting ? (
+            <ActivityIndicator color="#1F2937" />
+          ) : (
+            <Text style={styles.submitButtonText}>Submit report</Text>
+          )}
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -324,18 +390,18 @@ export default function App() {
             header: ({ options, route }) => (
               <ReportHeader
                 title={
-                  typeof options.title === 'string' && options.title.length
+                  typeof options.title === "string" && options.title.length
                     ? options.title
                     : route.name
                 }
               />
-            )
+            ),
           }}
         >
           <Stack.Screen
             name="ReportIncident"
             component={ReportIncidentScreen}
-            options={{ title: 'ResQ-Link' }}
+            options={{ title: "ResQ-Link" }}
           />
         </Stack.Navigator>
       </NavigationContainer>
@@ -347,154 +413,161 @@ export default function App() {
 const styles = StyleSheet.create({
   flex: {
     flex: 1,
-    backgroundColor: '#0F172A'
+    backgroundColor: COLORS.background,
   },
   scrollContent: {
     padding: 24,
-    paddingBottom: 48
+    paddingBottom: 48,
   },
   heading: {
     fontSize: 24,
-    fontWeight: '700',
-    color: '#E2E8F0',
-    marginBottom: 8
+    fontWeight: "700",
+    color: COLORS.textPrimary,
+    marginBottom: 8,
   },
   subheading: {
     fontSize: 14,
-    color: '#CBD5F5',
-    marginBottom: 24
+    color: COLORS.textSecondary,
+    marginBottom: 24,
   },
   section: {
-    marginBottom: 20
+    marginBottom: 20,
   },
   label: {
     fontSize: 14,
-    color: '#94A3B8',
-    marginBottom: 8
+    color: COLORS.textSecondary,
+    marginBottom: 8,
   },
   input: {
-    backgroundColor: '#1E293B',
+    backgroundColor: COLORS.surface,
     borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    color: '#E2E8F0',
+    color: COLORS.textPrimary,
     borderWidth: 1,
-    borderColor: '#334155'
+    borderColor: COLORS.border,
   },
   multiline: {
     height: 120,
-    lineHeight: 20
+    lineHeight: 20,
   },
   pillGroup: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
   },
   pill: {
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: COLORS.border,
     paddingHorizontal: 16,
-    paddingVertical: 6
+    paddingVertical: 6,
   },
   pillActive: {
-    backgroundColor: '#22C55E',
-    borderColor: '#22C55E'
+    backgroundColor: PRIMARY_COLOR,
+    borderColor: PRIMARY_COLOR,
   },
   pillText: {
-    color: '#E2E8F0',
+    color: COLORS.textSecondary,
     fontSize: 12,
-    fontWeight: '600'
+    fontWeight: "600",
   },
   pillTextActive: {
-    color: '#0F172A'
+    color: COLORS.textPrimary,
   },
   coordinates: {
-    flexDirection: 'row',
-    gap: 12
+    flexDirection: "row",
+    gap: 12,
   },
   coordinateField: {
-    flex: 1
+    flex: 1,
   },
   photoButton: {
-    backgroundColor: '#1D4ED8',
+    backgroundColor: PRIMARY_COLOR,
     borderRadius: 10,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    alignSelf: 'flex-start'
+    alignSelf: "flex-start",
+    borderWidth: 1,
+    borderColor: PRIMARY_COLOR,
   },
   photoButtonText: {
-    color: '#E2E8F0',
-    fontWeight: '600'
+    color: COLORS.textPrimary,
+    fontWeight: "600",
   },
   photoPreviewContainer: {
     marginTop: 12,
     borderRadius: 12,
-    overflow: 'hidden',
+    overflow: "hidden",
     borderWidth: 1,
-    borderColor: '#334155'
+    borderColor: COLORS.border,
   },
   photoPreview: {
-    width: '100%',
+    width: "100%",
     height: 200,
-    backgroundColor: '#1E293B'
+    backgroundColor: COLORS.surface,
   },
   photoHint: {
     padding: 8,
     fontSize: 12,
-    color: '#94A3B8'
+    color: COLORS.muted,
   },
   errorText: {
-    color: '#F87171',
-    marginBottom: 16
+    color: COLORS.danger,
+    marginBottom: 16,
   },
   successContainer: {
-    backgroundColor: '#14532D',
+    backgroundColor: COLORS.successSurface,
     borderRadius: 12,
     padding: 16,
-    marginBottom: 16
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: PRIMARY_COLOR,
   },
   successHeading: {
-    color: '#BBF7D0',
-    fontWeight: '700',
+    color: COLORS.successText,
+    fontWeight: "700",
     fontSize: 16,
-    marginBottom: 4
+    marginBottom: 4,
   },
   successText: {
-    color: '#DCFCE7',
+    color: COLORS.textPrimary,
     fontSize: 12,
-    lineHeight: 18
+    lineHeight: 18,
   },
   headerSafeArea: {
-    backgroundColor: '#0F172A'
+    backgroundColor: PRIMARY_COLOR,
   },
   headerContainer: {
     height: 40,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
+    justifyContent: "center",
+    alignItems: "flex-start",
     paddingHorizontal: 24,
     paddingBottom: 8,
-    backgroundColor: '#0F172A',
+    backgroundColor: PRIMARY_COLOR,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#1E293B'
+    borderBottomColor: "#9bb57a",
   },
   headerTitle: {
-    color: '#E2E8F0',
+    color: COLORS.textPrimary,
     fontSize: 22,
-    fontWeight: '700'
+    fontWeight: "700",
   },
   submitButton: {
-    backgroundColor: '#FACC15',
-    paddingVertical: 14,
+    backgroundColor: PRIMARY_COLOR,
     borderRadius: 12,
-    alignItems: 'center'
+    paddingVertical: 14,
+    alignItems: "center",
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: PRIMARY_COLOR,
   },
   submitButtonDisabled: {
-    opacity: 0.7
+    opacity: 0.6,
   },
   submitButtonText: {
-    color: '#0F172A',
-    fontWeight: '700',
-    fontSize: 16
-  }
+    color: COLORS.textPrimary,
+    fontWeight: "700",
+    fontSize: 16,
+  },
 });
